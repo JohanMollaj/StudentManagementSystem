@@ -1,13 +1,12 @@
 import javax.swing.*;
-import java.awt.event.*;
-import java.awt.*;
 
 public class Main {
     public static void main(String[] args) {
+        // testo lidhjen dhe inicializo tabelat para se te hapet GUI
+        DBInitializer.initialize();
+
         SwingUtilities.invokeLater(() -> {
-            testing frame = new testing();
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(500, 500);
+            MainFrame frame = new MainFrame();
             frame.setVisible(true);
         });
     }
