@@ -52,8 +52,7 @@ public class FileBackup {
                     String[] parts = line.split(",");
                     if (parts.length >= 7) {
                         LocalDate bd = parts[4].isEmpty() ? null : LocalDate.parse(parts[4]);
-                        Student s = new Student(parts[0], parts[1], parts[2], parts[3], bd, parts[6]);
-                        s.setGender(parts[5]);
+                        Student s = new Student(parts[0], parts[1], parts[2], parts[3], bd, parts[6], parts[5]);
                         list.add(s);
                     }
                 }

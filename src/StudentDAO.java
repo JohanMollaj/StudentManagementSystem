@@ -77,7 +77,8 @@ public class StudentDAO {
                         rs.getString("last_name"),
                         rs.getString("email"),
                         bd != null ? bd.toLocalDate() : null,
-                        rs.getString("status")
+                        rs.getString("status"),
+                        rs.getString("gender")  // ← shto kete
                 );
                 s.setGender(rs.getString("gender"));
                 list.add(s);
@@ -104,7 +105,8 @@ public class StudentDAO {
                         rs.getString("last_name"),
                         rs.getString("email"),
                         bd != null ? bd.toLocalDate() : null,
-                        rs.getString("status")
+                        rs.getString("status"),
+                        rs.getString("gender")  // ← shto kete
                 );
                 s.setGender(rs.getString("gender"));
                 return s;
@@ -133,7 +135,8 @@ public class StudentDAO {
                         rs.getString("last_name"),
                         rs.getString("email"),
                         bd != null ? bd.toLocalDate() : null,
-                        rs.getString("status")
+                        rs.getString("status"),
+                        rs.getString("gender")  // ← shto kete
                 );
                 s.setGender(rs.getString("gender"));
                 list.add(s);

@@ -1,4 +1,3 @@
-package gui;
 
 import javax.swing.*;
 import java.awt.*;
@@ -122,9 +121,10 @@ public class MainFrame extends JFrame {
      */
     private void initTabs() {
         tabbedPane = new JTabbedPane();
+        StudentManager studentManager = new StudentManager();
 
-        // ===== TAB 1: Studentë =====
-        studentPanel = new StudentPanel();
+        studentManager.loadAllFromDB();
+        studentPanel = new StudentPanel(studentManager);
         tabbedPane.addTab("👥 Studentë", studentPanel);
 
         // ===== TAB 2: Kurse (placeholder) =====

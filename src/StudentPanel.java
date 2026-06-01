@@ -1,6 +1,4 @@
-package gui;
 
-import model.Student;
 import util.DialogHelper;
 
 import javax.swing.*;
@@ -44,19 +42,18 @@ public class StudentPanel extends JPanel {
 
     // Referenca tek StudentManager (menaxhon listën e studentëve)
     // Do ta lidhim me bazën e të dhënave në të ardhmen
-    private List<Student> studentList;
+    private StudentManager studentManager;
 
     /**
      * Konstruktori - krijon panelin dhe inicializon të gjitha komponentet.
      */
-    public StudentPanel() {
-        studentList = new ArrayList<>(); // lista fillimisht bosh
+    public StudentPanel(StudentManager studentManager) {
+        this.studentManager = studentManager;
         setLayout(new BorderLayout(5, 5));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        initComponents();  // krijon komponentet
-        layoutComponents(); // i vendos ato
-        loadSampleData();   // shton disa të dhëna shembull
+        initComponents();
+        layoutComponents();
+        refreshTable(); // ngarko nga databaza
     }
 
     /**
@@ -163,22 +160,18 @@ public class StudentPanel extends JPanel {
      * Krijon StudentDialog, pret mbylljen, pastaj shton studentin nëse u ruajt.
      */
     private void openAddDialog() {
-        // Gjejmë JFrame prindër (MainFrame) duke shfletuar hierarkinë
         JFrame parent = (JFrame) SwingUtilities.getWindowAncestor(this);
-
         StudentDialog dialog = new StudentDialog(parent, "Shto Student të Ri", false);
-        dialog.setVisible(true); // shfaqim dialog-un (bllokuese deri sa mbyllet)
+        dialog.setVisible(true);
 
-        // Pas mbylljes, kontrollojmë nëse u ruajt studenti
         Student newStudent = dialog.getSavedStudent();
         if (newStudent != null) {
-            // Kontrollojmë nëse ID ekziston tashmë
-            if (isIdDuplicate(newStudent.getStudentId())) {
+            boolean success = studentManager.addStudent(newStudent);
+            if (!success) {
                 DialogHelper.showError("ID '" + newStudent.getStudentId() + "' ekziston tashmë!");
                 return;
             }
-            studentList.add(newStudent);
-            addStudentToTable(newStudent);
+            refreshTable();
             DialogHelper.showSuccess("Studenti '" + newStudent.getFullName() + "' u shtua me sukses!");
         }
     }
@@ -194,22 +187,26 @@ public class StudentPanel extends JPanel {
             return;
         }
 
-        // Gjejmë studentin e zgjedhur nga lista
-        Student selectedStudent = studentList.get(selectedRow);
-
+        Student selectedStudent = studentManager.getAllStudents().get(selectedRow);
         JFrame parent = (JFrame) SwingUtilities.getWindowAncestor(this);
         StudentDialog dialog = new StudentDialog(parent, "Modifiko Student", true);
-        dialog.fillFields(selectedStudent); // mbushim fushat me të dhënat ekzistuese
+        dialog.fillFields(selectedStudent);
         dialog.setVisible(true);
 
-        // Pas mbylljes, kontrollojmë nëse u ruajt
         Student editedStudent = dialog.getSavedStudent();
         if (editedStudent != null) {
-            // Zëvendësojmë studentin e vjetër me të riun
-            studentList.set(selectedRow, editedStudent);
-            refreshTable(); // ri-shfaqim tabelën
+            studentManager.updateStudent(editedStudent);
+            refreshTable();
             DialogHelper.showSuccess("Studenti u modifikua me sukses!");
         }
+    }
+
+    private void clearFields() {
+        txtId.setText("");
+        txtFirstName.setText("");
+        txtLastName.setText("");
+        txtEmail.setText("");
+        cmbStatus.setSelectedIndex(0);
     }
 
     /**
@@ -222,17 +219,15 @@ public class StudentPanel extends JPanel {
             return;
         }
 
-        Student student = studentList.get(selectedRow);
-
-        // Kërkojmë konfirmim para fshirjes
+        Student student = studentManager.getAllStudents().get(selectedRow);
         boolean confirmed = DialogHelper.showConfirm(
                 "A jeni i sigurt që doni të fshini studentin:\n'" + student.getFullName() + "'?"
         );
 
         if (confirmed) {
-            studentList.remove(selectedRow);
-            tableModel.removeRow(selectedRow);
-            clearFields(); // pastrojmë fushat
+            studentManager.deleteStudent(student.getStudentId());
+            refreshTable();
+            clearFields();
             DialogHelper.showSuccess("Studenti u fshi me sukses!");
         }
     }
@@ -242,11 +237,8 @@ public class StudentPanel extends JPanel {
      * Pastron tabelën dhe ri-shton çdo student.
      */
     private void refreshTable() {
-        // Fshijmë të gjitha rreshtat ekzistues
         tableModel.setRowCount(0);
-
-        // Shtojmë sërish çdo student nga lista
-        for (Student s : studentList) {
+        for (Student s : studentManager.getAllStudents()) {
             addStudentToTable(s);
         }
     }
@@ -275,63 +267,13 @@ public class StudentPanel extends JPanel {
      */
     private void fillFieldsFromSelectedRow() {
         int selectedRow = table.getSelectedRow();
-        if (selectedRow == -1 || selectedRow >= studentList.size()) return;
+        if (selectedRow == -1 || selectedRow >= studentManager.getAllStudents().size()) return;
 
-        Student student = studentList.get(selectedRow);
+        Student student = studentManager.getAllStudents().get(selectedRow);
         txtId.setText(student.getStudentId());
         txtFirstName.setText(student.getFirstName());
         txtLastName.setText(student.getLastName());
         txtEmail.setText(student.getEmail());
         cmbStatus.setSelectedItem(student.getStatus());
-    }
-
-    /**
-     * Pastron të gjitha fushat e formularit.
-     * Thirret pas fshirjes ose kur duam të fillojmë nga e para.
-     */
-    private void clearFields() {
-        txtId.setText("");
-        txtFirstName.setText("");
-        txtLastName.setText("");
-        txtEmail.setText("");
-        cmbStatus.setSelectedIndex(0);
-    }
-
-    /**
-     * Kontrollon nëse një ID ekziston tashmë në listë.
-     * Parandalon duplikimin e ID-ve.
-     *
-     * @param id  ID-ja për të kontrolluar
-     * @return true nëse ID ekziston; false nëse është unike
-     */
-    private boolean isIdDuplicate(String id) {
-        for (Student s : studentList) {
-            if (s.getStudentId().equalsIgnoreCase(id)) {
-                return true; // gjendëm duplikat
-            }
-        }
-        return false; // nuk gjendëm → është unike
-    }
-
-    /**
-     * Shton disa studentë shembull për testim vizual.
-     * Mund të hiqet kur lidhim me bazën e të dhënave.
-     */
-    private void loadSampleData() {
-        Student s1 = new Student("S001", "Ana", "Koci", "ana.koci@uni.edu.al",
-                LocalDate.of(2001, 3, 15), "Aktiv", "Femër");
-        Student s2 = new Student("S002", "Andi", "Marku", "andi.marku@uni.edu.al",
-                LocalDate.of(2000, 7, 22), "Aktiv", "Mashkull");
-        Student s3 = new Student("S003", "Besi", "Hoxha", "besi.hoxha@uni.edu.al",
-                LocalDate.of(2002, 11, 5), "Joaktiv", "Femër");
-
-        studentList.add(s1);
-        studentList.add(s2);
-        studentList.add(s3);
-
-        // Shfaqim studentët në tabelë
-        for (Student s : studentList) {
-            addStudentToTable(s);
-        }
     }
 }
