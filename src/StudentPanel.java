@@ -110,6 +110,20 @@ public class StudentPanel extends JPanel {
         btnRefresh.addActionListener(e -> refreshTable());
     }
 
+    private String generateNextId() {
+        int maxId = 0;
+        for (Student s : studentManager.getAllStudents()) {
+            String id = s.getStudentId(); // p.sh. "S007"
+            try {
+                int num = Integer.parseInt(id.substring(1)); // hiq "S" → merr 7
+                if (num > maxId) maxId = num;
+            } catch (NumberFormatException e) {
+                // nese ID nuk eshte ne formatin S+numer, kalo
+            }
+        }
+        return String.format("S%03d", maxId + 1); // S001, S002, S003...
+    }
+
     /**
      * Vendos komponentet brenda panelit.
      * BorderLayout: tabela në qendër, formulari në jug (poshtë).
@@ -162,6 +176,7 @@ public class StudentPanel extends JPanel {
     private void openAddDialog() {
         JFrame parent = (JFrame) SwingUtilities.getWindowAncestor(this);
         StudentDialog dialog = new StudentDialog(parent, "Shto Student të Ri", false);
+        dialog.setGeneratedId(generateNextId()); // vendos ID automatike
         dialog.setVisible(true);
 
         Student newStudent = dialog.getSavedStudent();

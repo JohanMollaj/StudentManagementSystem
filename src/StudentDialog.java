@@ -96,6 +96,12 @@ public class StudentDialog extends JDialog {
         btnCancel.addActionListener((ActionEvent e) -> dispose());
     }
 
+    public void setGeneratedId(String id) {
+        txtId.setText(id);
+        txtId.setEditable(false); // nuk mund ta ndryshoje
+        txtId.setBackground(new Color(230, 230, 230));
+    }
+
     /**
      * Vendos komponentet në panel me GridBagLayout.
      * GridBagLayout lejon vendosje të saktë të çdo komponenti.
