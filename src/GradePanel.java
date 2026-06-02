@@ -60,6 +60,7 @@ public class GradePanel extends JPanel {
 
         fieldsPanel.add(new JLabel("Kursi:"));
         courseCombo = new JComboBox<>();
+        courseCombo.addActionListener(e -> loadEnrolledStudents());
         fieldsPanel.add(courseCombo);
 
         fieldsPanel.add(new JLabel("Nota (0-10):"));
@@ -115,13 +116,25 @@ public class GradePanel extends JPanel {
     // ngarko studentet dhe kurset nga databaza ne combo boxes
     public void loadCombos() {
         studentCombo.removeAllItems();
-        for (Student s : studentDAO.getAll()) {
-            studentCombo.addItem(s); // perdor toString() te Student: "S001 - Ana Koci"
-        }
-
         courseCombo.removeAllItems();
-        for (Course c : courseDAO.getAll()) {
-            courseCombo.addItem(c); // perdor toString() te Course: "C001 - Matematike"
+
+        // shfaq vetem kurset ne combo
+        ArrayList<Course> courses = courseDAO.getAll();
+        for (Course c : courses) courseCombo.addItem(c);
+    }
+
+    private void loadEnrolledStudents() {
+        studentCombo.removeAllItems();
+        if (courseCombo.getSelectedItem() == null) return;
+
+        Course selected = (Course) courseCombo.getSelectedItem();
+        EnrollmentDAO enrollmentDAO = new EnrollmentDAO();
+        ArrayList<String> enrolledIds = enrollmentDAO.getStudentsByCourse(selected.getCourseId());
+
+        for (Student s : studentDAO.getAll()) {
+            if (enrolledIds.contains(s.getStudentId())) {
+                studentCombo.addItem(s);
+            }
         }
     }
 

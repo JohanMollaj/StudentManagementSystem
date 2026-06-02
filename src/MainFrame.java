@@ -27,6 +27,8 @@ public class MainFrame extends JFrame {
     private StudentPanel studentPanel;
     private CoursePanel coursePanel;
     private GradePanel gradePanel;
+    private EnrollmentPanel enrollmentPanel;
+
     // CoursePanel, GradePanel, SearchPanel do shtohen më vonë
 
     /**
@@ -124,9 +126,9 @@ public class MainFrame extends JFrame {
     private void initTabs() {
         tabbedPane = new JTabbedPane();
         tabbedPane.addChangeListener(e -> {
-            if (tabbedPane.getSelectedIndex() == 2) { // tab-i i notave
-                gradePanel.loadCombos();
-                gradePanel.refreshTable();
+            if (tabbedPane.getSelectedIndex() == 2) { // ndryshoje indexin sipas pozicionit
+                enrollmentPanel.loadCourses();
+                enrollmentPanel.loadStudentTables();
             }
         });
         StudentManager studentManager = new StudentManager();
@@ -138,6 +140,9 @@ public class MainFrame extends JFrame {
         // ===== TAB 2: Kurse (placeholder) =====
         coursePanel = new CoursePanel();
         tabbedPane.addTab("📚 Kurse", coursePanel);
+
+        enrollmentPanel = new EnrollmentPanel();
+        tabbedPane.addTab("📋 Regjistrimet", enrollmentPanel);
 
         // ===== TAB 3: Nota (placeholder) =====
         gradePanel = new GradePanel();
