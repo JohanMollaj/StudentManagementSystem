@@ -105,7 +105,7 @@ public class StudentPanel extends JPanel {
 
         // Lidhim butonat me metodat
         btnAdd.addActionListener(e -> openAddDialog());
-        btnEdit.addActionListener(e -> openEditDialog());
+        btnEdit.addActionListener(e -> saveEditFromFields());
         btnDelete.addActionListener(e -> deleteSelectedStudent());
         btnRefresh.addActionListener(e -> refreshTable());
     }
@@ -180,25 +180,44 @@ public class StudentPanel extends JPanel {
      * Hap dialog-un për modifikimin e studentit të zgjedhur.
      * Nëse nuk është zgjedhur asnjë rresht → tregon paralajmërim.
      */
-    private void openEditDialog() {
+    private void saveEditFromFields() {
         int selectedRow = table.getSelectedRow();
         if (selectedRow == -1) {
             DialogHelper.showWarning("Ju lutem zgjidhni një student nga tabela!");
             return;
         }
 
-        Student selectedStudent = studentManager.getAllStudents().get(selectedRow);
-        JFrame parent = (JFrame) SwingUtilities.getWindowAncestor(this);
-        StudentDialog dialog = new StudentDialog(parent, "Modifiko Student", true);
-        dialog.fillFields(selectedStudent);
-        dialog.setVisible(true);
+        // merr te dhenat nga fushat e poshtme
+        String id        = txtId.getText().trim();
+        String firstName = txtFirstName.getText().trim();
+        String lastName  = txtLastName.getText().trim();
+        String email     = txtEmail.getText().trim();
+        String status    = cmbStatus.getSelectedItem().toString();
 
-        Student editedStudent = dialog.getSavedStudent();
-        if (editedStudent != null) {
-            studentManager.updateStudent(editedStudent);
-            refreshTable();
-            DialogHelper.showSuccess("Studenti u modifikua me sukses!");
+        // validim i fushave bosh
+        if (id.isEmpty() || firstName.isEmpty() || lastName.isEmpty() || email.isEmpty()) {
+            DialogHelper.showError("Ju lutem plotesoni te gjitha fushat!");
+            return;
         }
+
+        // merr studentin ekzistues per te ruajtur te dhenat qe nuk ndryshojne (birthDate, gender)
+        Student existing = studentManager.getAllStudents().get(selectedRow);
+
+        Student updated = new Student(
+                id,
+                firstName,
+                lastName,
+                email,
+                existing.getBirthDate(),
+                status,
+                existing.getGender()
+        );
+
+        studentManager.updateStudent(updated);
+        refreshTable();
+        clearFields();
+        table.clearSelection();
+        DialogHelper.showSuccess("Studenti u modifikua me sukses!");
     }
 
     private void clearFields() {

@@ -70,6 +70,9 @@ public class StudentDialog extends JDialog {
         txtBirthDate = new JTextField(20);
         txtBirthDate.setToolTipText("Formati: yyyy-MM-dd  (p.sh. 2000-05-15)");
 
+        txtId.setEditable(false);
+        txtId.setBackground(new Color(230, 230, 230));
+
         // ComboBox me opsionet e statusit
         cmbStatus = new JComboBox<>(new String[]{"Aktiv", "Joaktiv"});
 
