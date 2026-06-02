@@ -26,6 +26,7 @@ public class MainFrame extends JFrame {
     // Panelet e tab-ave
     private StudentPanel studentPanel;
     private CoursePanel coursePanel;
+    private GradePanel gradePanel;
     // CoursePanel, GradePanel, SearchPanel do shtohen më vonë
 
     /**
@@ -122,6 +123,12 @@ public class MainFrame extends JFrame {
      */
     private void initTabs() {
         tabbedPane = new JTabbedPane();
+        tabbedPane.addChangeListener(e -> {
+            if (tabbedPane.getSelectedIndex() == 2) { // tab-i i notave
+                gradePanel.loadCombos();
+                gradePanel.refreshTable();
+            }
+        });
         StudentManager studentManager = new StudentManager();
 
         studentManager.loadAllFromDB();
@@ -133,7 +140,7 @@ public class MainFrame extends JFrame {
         tabbedPane.addTab("📚 Kurse", coursePanel);
 
         // ===== TAB 3: Nota (placeholder) =====
-        JPanel gradePanel = createPlaceholderPanel("Paneli i Notave do implementohet së shpejti...");
+        gradePanel = new GradePanel();
         tabbedPane.addTab("📊 Nota", gradePanel);
 
         // Shtojmë tabbedPane në qendër të dritares
