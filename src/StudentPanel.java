@@ -32,6 +32,8 @@ public class StudentPanel extends JPanel {
     private JTextField txtFirstName;
     private JTextField txtLastName;
     private JTextField txtEmail;
+    private JTextField txtSearch;
+    private JComboBox<String> cmbSearchBy;
     private JComboBox<String> cmbStatus;
 
     // Butonat
@@ -110,6 +112,56 @@ public class StudentPanel extends JPanel {
         btnRefresh.addActionListener(e -> refreshTable());
     }
 
+    private JPanel initSearchBar() {
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        searchPanel.setBorder(BorderFactory.createTitledBorder("Kërkim"));
+
+        searchPanel.add(new JLabel("Kërko:"));
+        txtSearch = new JTextField(20);
+        searchPanel.add(txtSearch);
+
+        searchPanel.add(new JLabel("Sipas:"));
+        cmbSearchBy = new JComboBox<>(new String[]{"Emrit", "ID", "Email", "Statusit"});
+        searchPanel.add(cmbSearchBy);
+
+        JButton btnClear = new JButton("Pastro");
+        btnClear.addActionListener(e -> {
+            txtSearch.setText("");
+            refreshTable();
+        });
+        searchPanel.add(btnClear);
+
+        // kerkim ne kohe reale ndersa shkruan
+        txtSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { performSearch(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { performSearch(); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { performSearch(); }
+        });
+
+        return searchPanel;
+    }
+
+    private void performSearch() {
+        String term = txtSearch.getText().toLowerCase().trim();
+        String criteria = cmbSearchBy.getSelectedItem().toString();
+
+        if (term.isEmpty()) {
+            refreshTable();
+            return;
+        }
+
+        tableModel.setRowCount(0);
+        for (Student s : studentManager.getAllStudents()) {
+            boolean matches = switch (criteria) {
+                case "ID"       -> s.getStudentId().toLowerCase().contains(term);
+                case "Email"    -> s.getEmail().toLowerCase().contains(term);
+                case "Statusit" -> s.getStatus().toLowerCase().contains(term);
+                default         -> s.getFullName().toLowerCase().contains(term);
+            };
+            if (matches) addStudentToTable(s);
+        }
+    }
+
     private String generateNextId() {
         int maxId = 0;
         for (Student s : studentManager.getAllStudents()) {
@@ -131,6 +183,7 @@ public class StudentPanel extends JPanel {
     private void layoutComponents() {
         // --- Paneli i sipërm: tabela ---
         JScrollPane scrollPane = new JScrollPane(table);
+        add(initSearchBar(), BorderLayout.NORTH);
         scrollPane.setBorder(BorderFactory.createTitledBorder("Lista e Studentëve"));
         add(scrollPane, BorderLayout.CENTER);
 

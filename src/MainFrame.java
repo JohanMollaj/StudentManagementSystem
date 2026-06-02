@@ -25,6 +25,7 @@ public class MainFrame extends JFrame {
 
     // Panelet e tab-ave
     private StudentPanel studentPanel;
+    private CoursePanel coursePanel;
     // CoursePanel, GradePanel, SearchPanel do shtohen më vonë
 
     /**
@@ -128,16 +129,12 @@ public class MainFrame extends JFrame {
         tabbedPane.addTab("👥 Studentë", studentPanel);
 
         // ===== TAB 2: Kurse (placeholder) =====
-        JPanel coursePanel = createPlaceholderPanel("Paneli i Kurseve do implementohet së shpejti...");
+        coursePanel = new CoursePanel();
         tabbedPane.addTab("📚 Kurse", coursePanel);
 
         // ===== TAB 3: Nota (placeholder) =====
         JPanel gradePanel = createPlaceholderPanel("Paneli i Notave do implementohet së shpejti...");
         tabbedPane.addTab("📊 Nota", gradePanel);
-
-        // ===== TAB 4: Kërkim (placeholder) =====
-        JPanel searchPanel = createPlaceholderPanel("Paneli i Kërkimit do implementohet së shpejti...");
-        tabbedPane.addTab("🔍 Kërkim", searchPanel);
 
         // Shtojmë tabbedPane në qendër të dritares
         add(tabbedPane, BorderLayout.CENTER);
